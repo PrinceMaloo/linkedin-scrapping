@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>LinkedIn Scraper</title>
+</head>
+<body>
+    <h1>LinkedIn Profile to JSON</h1>
+    <form id="scrape-form">
+        <input type="text" id="profile-url" placeholder="Enter LinkedIn Profile URL" size="50" required>
+        <button type="submit">Scrape</button>
+    </form>
+    <div id="status"></div>
+
+    <script>
+        document.getElementById("scrape-form").addEventListener("submit", async function (e) {
+            e.preventDefault();
+            const url = document.getElementById("profile-url").value;
+            const status = document.getElementById("status");
+            status.innerText = "Scraping... Please wait.";
+
+            const response = await fetch("/scrape", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ url }),
+            });
+
+            if (response.ok) {
+                const blob = await response.blob();
+                const a = document.createElement("a");
+                a.href = URL.createObjectURL(blob);
+                a.download = "profile.json";
+                a.click();
+                status.innerText = "Download started.";
+            } else {
+                const error = await response.json();
+                status.innerText = "Error: " + error.error;
+            }
+        });
+    </script>
+</body>
+</html>
